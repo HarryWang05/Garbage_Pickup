@@ -1,4 +1,4 @@
-
+Truck garbageTruck = new Truck(100,1.0);
 
 void setup() {
   size(600,600);
