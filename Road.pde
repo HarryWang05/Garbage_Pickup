@@ -9,18 +9,18 @@ class Road {
     this.end = end;
     this.direction = direction;
     adjList.add(new ArrayList<Road>());
+    if(this.start.equals(landfill)) {
+      starting = this;
+      startIndex = adjList.size()-1;
+    }
     for(int i = 0; i < roads.size(); i++) {
-      if(roads.get(i).end == this.start) {
+      if(roads.get(i).end.equals(this.start)) {
         //Add the road being created to the road's adjList index
         adjList.get(i).add(this);
       }
-      if(roads.get(i).start == this.end) {
+      if(roads.get(i).start.equals(this.end)) {
         //Add the road to the adjList index of the road being created
         adjList.get(adjList.size()-1).add(roads.get(i));
-      }
-      if(roads.get(i).start == landfill) {
-        starting = this;
-        startIndex = i;
       }
     }
   }

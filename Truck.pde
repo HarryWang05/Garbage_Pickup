@@ -11,10 +11,7 @@ class Truck {
     this.paint = color(0,127,0);
     this.direction = 0;
   }
-  void turn_right() {
-    direction += PI/4;
-  }
-  void turn_left() {
-    direction -= PI/4;
+  void turn() {
+    direction -= PI/2;
   }
 }
