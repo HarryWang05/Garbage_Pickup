@@ -23,6 +23,12 @@ class Road {
         adjList.get(adjList.size()-1).add(roads.get(i));
       }
     }
+    Intersection starter = new Intersection(this.start);
+    Intersection ender = new Intersection(this.end);
+    starter.neighbours.add(ender);
+    ender.neighbours.add(starter);
+    intersections.add(starter);
+    intersections.add(ender);
   }
   void addHouse(int houseLoc) {
     houses.add(houseLoc);

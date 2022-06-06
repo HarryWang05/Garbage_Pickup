@@ -7,6 +7,7 @@ int startIndex;
 Road current;
 int currentIndex;
 ArrayList<Road> roads = new ArrayList<Road>();
+HashSet<Intersection> intersections = new HashSet<Intersection>();
 ArrayList<ArrayList<Road>> adjList = new ArrayList<ArrayList<Road>>();
 String[] newRoads;
 
@@ -33,6 +34,12 @@ void draw() {
   fill(127,127,127);
   for(int i = 0; i < roads.size(); i++) {
     roads.get(i).pave();
+  }
+  fill(127,127,127);
+  for(Intersection it : intersections) {
+    rectMode(CENTER);
+    rect(it.pos.x,it.pos.y,20,20);
+    rectMode(CORNER);
   }
   fill(127,127,255);
   circle(landfill.x,landfill.y,20);
