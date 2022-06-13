@@ -4,7 +4,7 @@ boolean eulerian;
 int startIndex;
 int currentIndex;
 int pathIndex;
-PVector landfill = new PVector(100,100);
+PVector landfill = new PVector(200,200);
 Truck garbageTruck = new Truck(100,1.0,landfill);
 Road starting;
 Road current;
@@ -24,10 +24,55 @@ void setup() {
   size(600,600);
   frameRate(1);
   newRoads = loadStrings("roads.txt");
-  roads.add(new Road(new PVector(100,100), new PVector(100,200), true));
+  boolean direct;
+  String hold,first,second;
+  int commaIndex;
+  PVector pointOne;
+  PVector pointTwo;
+  for(int i = 0; i < newRoads.length; i++) {
+    hold = newRoads[i];
+    commaIndex = hold.indexOf(',');
+    first = hold.substring(0,commaIndex);
+    second = hold.substring(commaIndex+1,hold.length());
+    pointOne = new PVector(int(first),int(second));
+    i++;
+    hold = newRoads[i];
+    commaIndex = hold.indexOf(',');
+    first = hold.substring(0,commaIndex);
+    second = hold.substring(commaIndex+1,hold.length());
+    pointTwo = new PVector(int(first),int(second));
+    i++;
+    if(pointOne.x == pointTwo.x) {
+      direct = false;
+    } else if(pointOne.y == pointTwo.y) {
+      direct = true;
+    } else {
+      println("Error reading roads.txt, no possible direction");
+      break;
+    }
+    roads.add(new Road(pointOne, pointTwo, true));
+  }
+  //roads.add(new Road(new PVector(100,100), new PVector(100,200), true));
   roads.add(new Road(new PVector(100,200), new PVector(200,200), false));
   roads.add(new Road(new PVector(200,200), new PVector(200,100), true));
   roads.add(new Road(new PVector(200,100), new PVector(100,100), false));
+  
+  roads.add(new Road(new PVector(100,100), new PVector(0,100), false));
+  roads.add(new Road(new PVector(0,100), new PVector(0,200), true));
+  roads.add(new Road(new PVector(0,200), new PVector(100,200), false));
+  
+  roads.add(new Road(new PVector(100,200), new PVector(100,300), true));
+  roads.add(new Road(new PVector(100,300), new PVector(200,300), false));
+  roads.add(new Road(new PVector(200,300), new PVector(200,200), true));
+  
+  roads.add(new Road(new PVector(200,200), new PVector(300,200), false));
+  roads.add(new Road(new PVector(300,200), new PVector(300,100), true));
+  roads.add(new Road(new PVector(300,100), new PVector(200,100), false));
+  
+  roads.add(new Road(new PVector(200,100), new PVector(200,0), true));
+  roads.add(new Road(new PVector(200,0), new PVector(100,0), false));
+  roads.add(new Road(new PVector(100,0), new PVector(100,100), true));
+  
   garbageTruck.loc = starting.start;
   current = starting;
   currentIndex = startIndex;
@@ -83,6 +128,7 @@ void draw() {
       println(path.get(i));
     }
     println("YESS");
+    noLoop();
   }
 }
 

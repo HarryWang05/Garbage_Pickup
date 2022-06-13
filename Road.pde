@@ -8,6 +8,10 @@ class Road {
     this.houses = new ArrayList<Integer>();
     this.start = start;
     this.end = end;
+    this.start.x += 100;
+    this.start.y += 100;
+    this.end.x += 100;
+    this.end.y += 100;
     this.direction = direction;
     adjList.add(new ArrayList<Road>());
     if(this.start.equals(landfill)) {
