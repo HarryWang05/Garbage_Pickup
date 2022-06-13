@@ -3,16 +3,18 @@ import java.util.*;
 boolean eulerian;
 int startIndex;
 int currentIndex;
+int pathIndex;
 PVector landfill = new PVector(100,100);
 Truck garbageTruck = new Truck(100,1.0,landfill);
 Road starting;
 Road current;
+Intersection startingPoint;
 String[] newRoads;
 ArrayList<Road> roads = new ArrayList<Road>();
 ArrayList<ArrayList<Road>> adjList = new ArrayList<ArrayList<Road>>();
-HashSet<Intersection> intersections = new HashSet<Intersection>();
-HashSet<Intersection> visited = new HashSet<Intersection>();
-ArrayList<Intersection> path;
+HashSet<PVector> intersectionSet = new HashSet<PVector>();
+HashMap<PVector, ArrayList<PVector>> intersections = new HashMap<PVector, ArrayList<PVector>>();
+ArrayList<PVector> path;
 
 //Mouse fields
 PVector clickCoord = new PVector();
@@ -29,7 +31,19 @@ void setup() {
   garbageTruck.loc = starting.start;
   current = starting;
   currentIndex = startIndex;
-  path = findPath(new ArrayList<Intersection>());
+  eulerian = checkEulerian();
+  /*for(Intersection it : intersections) {
+    if(it.pos.equals(landfill)) {
+      startingPoint = it;
+      break;
+    }
+  }*/
+  path = new ArrayList<PVector>();
+  path.add(landfill);
+  println(path);
+  path = findPath(path);
+  path.add(landfill);
+  println(path);
 }
 
 void draw() {
@@ -39,11 +53,11 @@ void draw() {
     roads.get(i).pave();
   }
   fill(127,127,127);
-  for(Intersection it : intersections) {
-    rectMode(CENTER);
-    rect(it.pos.x,it.pos.y,20,20);
-    rectMode(CORNER);
+  rectMode(CENTER);
+  for(PVector it : intersectionSet) {
+    rect(it.x,it.y,20,20);
   }
+  rectMode(CENTER);
   fill(127,127,255);
   circle(landfill.x,landfill.y,20);
   fill(garbageTruck.paint);
@@ -58,13 +72,24 @@ void draw() {
   /*if(current.direction != adjList.get(currentIndex).get(0).direction) {
     garbageTruck.turn();
   }*/
-  current = adjList.get(currentIndex).get(0);
+  /*current = adjList.get(currentIndex).get(0);
   currentIndex = roads.indexOf(current);
-  garbageTruck.loc = roads.get(currentIndex).start;
+  garbageTruck.loc = roads.get(currentIndex).start;*/
+  if(pathIndex < path.size()) {
+    garbageTruck.loc = path.get(pathIndex);
+    pathIndex++;
+  } else {
+    for(int i = 0; i < path.size(); i++) {
+      println(path.get(i));
+    }
+    println("YESS");
+  }
 }
 
-ArrayList<Intersection> findPath(ArrayList<Intersection> prev) {
-  Intersection current = prev.get(prev.size()-1);
+ArrayList<PVector> findPath(ArrayList<PVector> prev) {
+  PVector current = prev.get(prev.size()-1);
+  println(current);
+  println(eulerian);
   int size;
   if(eulerian) {
     size = intersections.size();
@@ -74,18 +99,36 @@ ArrayList<Intersection> findPath(ArrayList<Intersection> prev) {
   if(prev.size() == size) {
     return prev;
   }
-  for(int i = 0; i < current.neighbours.size(); i++) {
-    if(!visited.contains(current.neighbours.get(i))) {
-      prev.add(current.neighbours.get(i));
-      visited.add(current.neighbours.get(i));
-      prev = findPath(prev);
-      if(prev == null) {
+  println(intersections.get(current).size());
+  for(int i = 0; i < intersections.get(current).size(); i++) {
+    println("not ok");
+    if(!prev.contains(intersections.get(current).get(i))) {
+      println("ok");
+      prev.add(intersections.get(current).get(i));
+      ArrayList<PVector> hold;
+      hold = findPath(prev);
+      if(hold == null) {
+        prev.remove(prev.size()-1);
         continue;
       }
-      return prev;
+      if(!intersections.get(prev.get(prev.size()-1)).contains(landfill)) {
+        prev.remove(prev.size()-1);
+        continue;
+      }
+      return hold;
     }
   }
   return null;
+}
+
+boolean checkEulerian() {
+  for(PVector it : intersectionSet) {
+    printArray(intersections.get(it).toArray());
+    if(intersections.get(it).size()%2 == 1) {
+      return false;
+    }
+  }
+  return true;
 }
 
 void mousePressed() {

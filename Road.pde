@@ -4,6 +4,7 @@ class Road {
   PVector end;
   ArrayList<Integer> houses;
   Road(PVector start, PVector end, boolean direction) {
+    boolean exists;
     this.houses = new ArrayList<Integer>();
     this.start = start;
     this.end = end;
@@ -23,12 +24,42 @@ class Road {
         adjList.get(adjList.size()-1).add(roads.get(i));
       }
     }
-    Intersection starter = new Intersection(this.start);
+    if(!intersections.containsKey(this.start)) {
+      intersections.put(this.start,new ArrayList<PVector>());
+    }
+    if(!intersections.containsKey(this.end)) {
+      intersections.put(this.end,new ArrayList<PVector>());
+    }
+    intersections.get(this.start).add(this.end);
+    intersections.get(this.end).add(this.start);
+    intersectionSet.add(this.start);
+    intersectionSet.add(this.end);
+    /*Intersection starter = new Intersection(this.start);
     Intersection ender = new Intersection(this.end);
-    starter.neighbours.add(ender);
-    ender.neighbours.add(starter);
-    intersections.add(starter);
-    intersections.add(ender);
+    exists = false;
+    for(Intersection it : intersections) {
+      if(it.pos.equals(starter.pos)) {
+        it.neighbours.add(ender);
+        exists = true;
+        break;
+      }
+    }
+    if(!exists) {
+      starter.neighbours.add(ender);
+      intersections.add(starter);
+    }
+    exists = false;
+    for(Intersection it : intersections) {
+      if(it.pos.equals(ender.pos)) {
+        it.neighbours.add(starter);
+        exists = true;
+        break;
+      }
+    }
+    if(!exists) {
+      ender.neighbours.add(starter);
+      intersections.add(ender);
+    }*/
   }
   void addHouse(int houseLoc) {
     houses.add(houseLoc);
