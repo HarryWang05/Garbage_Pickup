@@ -2,6 +2,7 @@ import java.util.*;
 import g4p_controls.*;
 
 // Global variables
+boolean running;
 boolean eulerian;
 int startIndex;
 int currentIndex;
@@ -27,6 +28,7 @@ ArrayList<PairPVector> visitedRoads = new ArrayList<PairPVector>();
 void setup() {
   size(600, 600);
   frameRate(1);
+  createGUI();
   /*roads.add(new Road(new PVector(100,100), new PVector(100,200), true));
    roads.add(new Road(new PVector(100,200), new PVector(200,200), false));
    roads.add(new Road(new PVector(200,200), new PVector(200,100), true));
@@ -86,6 +88,10 @@ void draw() {
   /*current = adjList.get(currentIndex).get(0);
    currentIndex = roads.indexOf(current);
    garbageTruck.loc = roads.get(currentIndex).start;*/
+  if(!running) {
+    noLoop();
+    return;
+  }
   if (pathIndex < path.size()) {
     garbageTruck.loc = path.get(pathIndex);
     pathIndex++;
