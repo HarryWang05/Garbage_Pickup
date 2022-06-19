@@ -9,7 +9,7 @@ class Road {
     this.start = start;
     this.end = end;
     this.direction = direction;
-    adjList.add(new ArrayList<Road>());
+    /*adjList.add(new ArrayList<Road>());
     if(this.start.equals(landfill)) {
       starting = this;
       startIndex = adjList.size()-1;
@@ -23,7 +23,7 @@ class Road {
         //Add the road to the adjList index of the road being created
         adjList.get(adjList.size()-1).add(roads.get(i));
       }
-    }
+    }*/
     if(!intersections.containsKey(this.start)) {
       intersections.put(this.start,new ArrayList<PVector>());
     }

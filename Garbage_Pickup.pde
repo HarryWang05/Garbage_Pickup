@@ -1,4 +1,5 @@
 import java.util.*;
+import g4p_controls.*;
 
 // Global variables
 boolean eulerian;
@@ -20,53 +21,12 @@ HashSet<PVector> intersectionSet = new HashSet<PVector>();
 
 // Data structures for roads
 ArrayList<Road> roads = new ArrayList<Road>();
-HashSet<PairPVector> visitedRoads = new HashSet<PairPVector>();
-// ArrayList<ArrayList<Road>> adjList = new ArrayList<ArrayList<Road>>();
-
-//Mouse fields
-PVector clickCoord = new PVector();
-PVector releaseCoord = new PVector();
+ArrayList<PairPVector> visitedRoads = new ArrayList<PairPVector>();
+//ArrayList<HashSet<PVector>> visitedRoads = new ArrayList<HashSet<PVector>>();
 
 void setup() {
   size(600, 600);
   frameRate(1);
-  newRoads = loadStrings("roads.txt");
-  boolean direct;
-  String hold, first, second;
-  int commaIndex;
-  PVector pointOne;
-  PVector pointTwo;
-  for (int i = 0; i < newRoads.length; i++) {
-    if (newRoads[i].charAt(0) == '#') {
-      i++;
-      continue;
-    }
-    hold = newRoads[i];
-    if(hold.length() == 0) {
-      println("Error reading roads.txt, empty string");
-      break;
-    }
-    commaIndex = hold.indexOf(',');
-    first = hold.substring(0, commaIndex);
-    second = hold.substring(commaIndex+1, hold.length());
-    pointOne = new PVector(int(first), int(second));
-    i++;
-    hold = newRoads[i];
-    commaIndex = hold.indexOf(',');
-    first = hold.substring(0, commaIndex);
-    second = hold.substring(commaIndex+1, hold.length());
-    pointTwo = new PVector(int(first), int(second));
-    i++;
-    if (pointOne.x == pointTwo.x) {
-      direct = true;
-    } else if (pointOne.y == pointTwo.y) {
-      direct = false;
-    } else {
-      println("Error reading roads.txt, no possible direction");
-      break;
-    }
-    roads.add(new Road(pointOne, pointTwo, direct));
-  }
   /*roads.add(new Road(new PVector(100,100), new PVector(100,200), true));
    roads.add(new Road(new PVector(100,200), new PVector(200,200), false));
    roads.add(new Road(new PVector(200,200), new PVector(200,100), true));
@@ -87,23 +47,14 @@ void setup() {
    roads.add(new Road(new PVector(200,100), new PVector(200,0), true));
    roads.add(new Road(new PVector(200,0), new PVector(100,0), false));
    roads.add(new Road(new PVector(100,0), new PVector(100,100), true));*/
-
-  garbageTruck.loc = starting.start;
-  current = starting;
-  currentIndex = startIndex;
-  eulerian = checkEulerian();
-  /*for(Intersection it : intersections) {
-   if(it.pos.equals(landfill)) {
-   startingPoint = it;
-   break;
-   }
-   }*/
-  path = new ArrayList<PVector>();
-  path.add(landfill);
-  println(path);
-  path = findPath(path);
-  path.add(landfill);
-  println(path);
+  setLayout();
+  //println(path);
+  /*for(int i = 0; i < visitedRoads.size(); i++) {
+    for(PVector it : visitedRoads.get(i)) {
+      print(it);
+    }
+    println("|||");
+  }*/
 }
 
 void draw() {
@@ -148,13 +99,14 @@ void draw() {
 }
 
 ArrayList<PVector> findPath(ArrayList<PVector> prev) {
-  PairPVector currentRoad;
+  //PairPVector currentRoad;
+  //HashSet<PVector> currentRoad = new HashSet<PVector>();
+  PairPVector currentRoad = new PairPVector();
   PVector current = prev.get(prev.size()-1);
-  println(current);
-  println(eulerian);
+  //println(current);
+  //println(eulerian);
   int size;
   if (eulerian) {
-    //size = intersections.size();
     size = roads.size()*2;
   } else {
     size = intersections.size()+1;
@@ -162,16 +114,17 @@ ArrayList<PVector> findPath(ArrayList<PVector> prev) {
   if (prev.size() == size) {
     return prev;
   }
-  println(intersections.get(current).size());
   for (int i = 0; i < intersections.get(current).size(); i++) {
-    println("not ok");
-    currentRoad = new PairPVector(current, intersections.get(current).get(i));
-    if (!currentRoad.setContains(visitedRoads)) {
-      //if(!prev.contains(intersections.get(current).get(i))) {
-      /*for(PairPVector it : visitedRoads) {
-       println(it.x,it.y);
-       }*/
-      println("ok");
+    /*currentRoad.clear();
+    currentRoad.add(current);
+    currentRoad.add(intersections.get(current).get(i));*/
+    currentRoad.x = current;
+    currentRoad.y = intersections.get(current).get(i);
+    for(int j = 0; j < visitedRoads.size(); j++) {
+      println(currentRoad,visitedRoads.get(j),visitedRoads.get(j).equals(currentRoad));
+    }
+    if(!currentRoad.arrayContains(visitedRoads)) {
+    //if (!visitedRoads.contains(currentRoad)) {
       prev.add(intersections.get(current).get(i));
       visitedRoads.add(currentRoad);
       ArrayList<PVector> hold;
@@ -192,7 +145,7 @@ ArrayList<PVector> findPath(ArrayList<PVector> prev) {
 
 boolean checkEulerian() {
   for (PVector it : intersectionSet) {
-    printArray(intersections.get(it).toArray());
+    //printArray(intersections.get(it).toArray());
     if (intersections.get(it).size()%2 == 1) {
       return false;
     }
@@ -200,15 +153,55 @@ boolean checkEulerian() {
   return true;
 }
 
-void mousePressed() {
-  clickCoord.x = mouseX;
-  clickCoord.y = mouseY;
-  println(clickCoord);
-}
-
-void mouseReleased() {
-  releaseCoord.x = mouseX;
-  releaseCoord.y = mouseY;
-  println(releaseCoord);
-  roads.add(new Road(clickCoord, new PVector(releaseCoord.x, clickCoord.y), false));
+void setLayout() {
+  intersections.clear();
+  intersectionSet.clear();
+  roads.clear();
+  visitedRoads.clear();
+  newRoads = loadStrings("roads.txt");
+  boolean direct;
+  String hold, first, second;
+  int commaIndex;
+  PVector pointOne;
+  PVector pointTwo;
+  for (int i = 0; i < newRoads.length; i++) {
+    if (newRoads[i].charAt(0) == '#') {
+      i++;
+      continue;
+    }
+    hold = newRoads[i];
+    if(hold.length() == 0) {
+      println("Error reading roads.txt, empty string");
+      break;
+    }
+    commaIndex = hold.indexOf(',');
+    first = hold.substring(0, commaIndex);
+    second = hold.substring(commaIndex+1, hold.length());
+    pointOne = new PVector(int(first), int(second));
+    i++;
+    hold = newRoads[i];
+    commaIndex = hold.indexOf(',');
+    first = hold.substring(0, commaIndex);
+    second = hold.substring(commaIndex+1, hold.length());
+    pointTwo = new PVector(int(first), int(second));
+    i++;
+    if (pointOne.x == pointTwo.x) {
+      direct = true;
+    } else if (pointOne.y == pointTwo.y) {
+      direct = false;
+    } else {
+      println("Error reading roads.txt, no possible direction");
+      break;
+    }
+    roads.add(new Road(pointOne, pointTwo, direct));
+  }
+  garbageTruck.loc = landfill;
+  current = starting;
+  currentIndex = startIndex;
+  eulerian = checkEulerian();
+  path = new ArrayList<PVector>();
+  path.add(landfill);
+  //println(path);
+  path = findPath(path);
+  path.add(landfill);
 }
