@@ -1,11 +1,11 @@
 class Road {
+  // Fields
   boolean direction;
   PVector start;
   PVector end;
-  ArrayList<Integer> houses;
+  // Constructor
   Road(PVector start, PVector end, boolean direction) {
     boolean exists;
-    this.houses = new ArrayList<Integer>();
     this.start = start;
     this.end = end;
     this.direction = direction;
@@ -24,6 +24,7 @@ class Road {
         adjList.get(adjList.size()-1).add(roads.get(i));
       }
     }*/
+    // Adds intersections if they don't exist yet, and add neighbours to intersections
     if(!intersections.containsKey(this.start)) {
       intersections.put(this.start,new ArrayList<PVector>());
     }
@@ -61,9 +62,7 @@ class Road {
       intersections.add(ender);
     }*/
   }
-  void addHouse(int houseLoc) {
-    houses.add(houseLoc);
-  }
+  // Render roads
   void pave() {
     rectMode(CORNERS);
     if(direction) {

@@ -20,6 +20,7 @@ synchronized public void win_draw1(PApplet appc, GWinData data) { //_CODE_:windo
 
 public void startClick(GButton source, GEvent event) { //_CODE_:startButton:993239:
   println("startButton - GButton >> GEvent." + event + " @ " + millis());
+  // Pause resume function
   running = !running;
   if(running) {
     startButton.setText("Stop");

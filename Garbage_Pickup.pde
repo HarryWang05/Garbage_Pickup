@@ -7,9 +7,10 @@ boolean eulerian;
 int startIndex;
 int currentIndex;
 int pathIndex;
+String whichFile = "roads.txt";
 
 PVector landfill = new PVector(200, 200);
-Truck garbageTruck = new Truck(100, 1.0, landfill);
+Truck garbageTruck = new Truck(100, landfill);
 Road starting;
 Road current;
 
@@ -60,6 +61,22 @@ void setup() {
 }
 
 void draw() {
+  // Pause if paused
+  if(!running) {
+    noLoop();
+    return;
+  }
+  // Path is precalculated, simply iterating through it
+  if (pathIndex < path.size()) {
+    garbageTruck.loc = path.get(pathIndex);
+    pathIndex++;
+  } else {
+    for (int i = 0; i < path.size(); i++) {
+      println(path.get(i));
+    }
+    println("YESS");
+    noLoop();
+  }
   background(127, 255, 0);
   fill(127, 127, 127);
   for (int i = 0; i < roads.size(); i++) {
@@ -88,57 +105,48 @@ void draw() {
   /*current = adjList.get(currentIndex).get(0);
    currentIndex = roads.indexOf(current);
    garbageTruck.loc = roads.get(currentIndex).start;*/
-  if(!running) {
-    noLoop();
-    return;
-  }
-  if (pathIndex < path.size()) {
-    garbageTruck.loc = path.get(pathIndex);
-    pathIndex++;
-  } else {
-    for (int i = 0; i < path.size(); i++) {
-      println(path.get(i));
-    }
-    println("YESS");
-    noLoop();
-  }
 }
 
+// Find shortest path using depth-first-search
 ArrayList<PVector> findPath(ArrayList<PVector> prev) {
-  //PairPVector currentRoad;
   //HashSet<PVector> currentRoad = new HashSet<PVector>();
+  ArrayList<PVector> hold;
   PairPVector currentRoad = new PairPVector();
   PVector current = prev.get(prev.size()-1);
-  //println(current);
-  //println(eulerian);
+  // Lenght of path based on eulerian or not
   int size;
   if (eulerian) {
     size = roads.size()*2;
   } else {
-    size = intersections.size()+1;
+    size = roads.size()*2+1;
   }
+  // Base case, if path is already at proper size
   if (prev.size() == size) {
     return prev;
   }
+  // DFS, try every possible direction
   for (int i = 0; i < intersections.get(current).size(); i++) {
     /*currentRoad.clear();
     currentRoad.add(current);
     currentRoad.add(intersections.get(current).get(i));*/
+    // Get start and end of road
     currentRoad.x = current;
     currentRoad.y = intersections.get(current).get(i);
     for(int j = 0; j < visitedRoads.size(); j++) {
       println(currentRoad,visitedRoads.get(j),visitedRoads.get(j).equals(currentRoad));
     }
+    // If not in visited, move along road
     if(!currentRoad.arrayContains(visitedRoads)) {
     //if (!visitedRoads.contains(currentRoad)) {
       prev.add(intersections.get(current).get(i));
       visitedRoads.add(currentRoad);
-      ArrayList<PVector> hold;
       hold = findPath(prev);
+      // If no possible path along that road
       if (hold == null) {
         prev.remove(prev.size()-1);
         continue;
       }
+      // If path does not end beside landfill
       if (!intersections.get(prev.get(prev.size()-1)).contains(landfill)) {
         prev.remove(prev.size()-1);
         continue;
@@ -146,25 +154,28 @@ ArrayList<PVector> findPath(ArrayList<PVector> prev) {
       return hold;
     }
   }
+  // Only returns null if no possible path
   return null;
 }
 
+// Check if it is eulerian graph
 boolean checkEulerian() {
   for (PVector it : intersectionSet) {
-    //printArray(intersections.get(it).toArray());
-    if (intersections.get(it).size()%2 == 1) {
+    // Allows sizes of 1 because the truck can go both ways of the road
+    if (intersections.get(it).size()%2 == 1 && intersections.get(it).size() != 1) {
       return false;
     }
   }
   return true;
 }
 
+// Setup the entire layout of a roads file
 void setLayout() {
   intersections.clear();
   intersectionSet.clear();
   roads.clear();
   visitedRoads.clear();
-  newRoads = loadStrings("roads.txt");
+  newRoads = loadStrings(whichFile);
   boolean direct;
   String hold, first, second;
   int commaIndex;
