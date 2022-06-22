@@ -1,7 +1,6 @@
 class Truck {
   // Fields
   PVector loc;
-  float direction;
   int capacity;
   color paint;
   // Constructor
@@ -9,9 +8,11 @@ class Truck {
     this.capacity = capacity;
     this.loc = loc;
     this.paint = color(0,127,0);
-    this.direction = 0;
   }
-  void turn() {
-    direction -= PI/2;
+  void turnRed() {
+    paint = color(127,0,0);
+  }
+  void turnGreen() {
+    paint = color(0,127,0);
   }
 }

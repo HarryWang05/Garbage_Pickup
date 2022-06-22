@@ -5,25 +5,9 @@ class Road {
   PVector end;
   // Constructor
   Road(PVector start, PVector end, boolean direction) {
-    boolean exists;
     this.start = start;
     this.end = end;
     this.direction = direction;
-    /*adjList.add(new ArrayList<Road>());
-    if(this.start.equals(landfill)) {
-      starting = this;
-      startIndex = adjList.size()-1;
-    }
-    for(int i = 0; i < roads.size(); i++) {
-      if(roads.get(i).end.equals(this.start)) {
-        //Add the road being created to the road's adjList index
-        adjList.get(i).add(this);
-      }
-      if(roads.get(i).start.equals(this.end)) {
-        //Add the road to the adjList index of the road being created
-        adjList.get(adjList.size()-1).add(roads.get(i));
-      }
-    }*/
     // Adds intersections if they don't exist yet, and add neighbours to intersections
     if(!intersections.containsKey(this.start)) {
       intersections.put(this.start,new ArrayList<PVector>());
@@ -35,32 +19,6 @@ class Road {
     intersections.get(this.end).add(this.start);
     intersectionSet.add(this.start);
     intersectionSet.add(this.end);
-    /*Intersection starter = new Intersection(this.start);
-    Intersection ender = new Intersection(this.end);
-    exists = false;
-    for(Intersection it : intersections) {
-      if(it.pos.equals(starter.pos)) {
-        it.neighbours.add(ender);
-        exists = true;
-        break;
-      }
-    }
-    if(!exists) {
-      starter.neighbours.add(ender);
-      intersections.add(starter);
-    }
-    exists = false;
-    for(Intersection it : intersections) {
-      if(it.pos.equals(ender.pos)) {
-        it.neighbours.add(starter);
-        exists = true;
-        break;
-      }
-    }
-    if(!exists) {
-      ender.neighbours.add(starter);
-      intersections.add(ender);
-    }*/
   }
   // Render roads
   void pave() {

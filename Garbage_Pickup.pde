@@ -3,14 +3,13 @@ import g4p_controls.*;
 
 // Global variables
 boolean running;
-boolean eulerian;
-int startIndex;
-int currentIndex;
+int currentCap;
 int pathIndex;
+int backTrack;
 String whichFile = "roads.txt";
 
 PVector landfill = new PVector(200, 200);
-Truck garbageTruck = new Truck(100, landfill);
+Truck garbageTruck = new Truck(2, landfill);
 Road starting;
 Road current;
 
@@ -24,40 +23,12 @@ HashSet<PVector> intersectionSet = new HashSet<PVector>();
 // Data structures for roads
 ArrayList<Road> roads = new ArrayList<Road>();
 ArrayList<PairPVector> visitedRoads = new ArrayList<PairPVector>();
-//ArrayList<HashSet<PVector>> visitedRoads = new ArrayList<HashSet<PVector>>();
 
 void setup() {
   size(600, 600);
   frameRate(1);
   createGUI();
-  /*roads.add(new Road(new PVector(100,100), new PVector(100,200), true));
-   roads.add(new Road(new PVector(100,200), new PVector(200,200), false));
-   roads.add(new Road(new PVector(200,200), new PVector(200,100), true));
-   roads.add(new Road(new PVector(200,100), new PVector(100,100), false));
-   
-   roads.add(new Road(new PVector(100,100), new PVector(0,100), false));
-   roads.add(new Road(new PVector(0,100), new PVector(0,200), true));
-   roads.add(new Road(new PVector(0,200), new PVector(100,200), false));
-   
-   roads.add(new Road(new PVector(100,200), new PVector(100,300), true));
-   roads.add(new Road(new PVector(100,300), new PVector(200,300), false));
-   roads.add(new Road(new PVector(200,300), new PVector(200,200), true));
-   
-   roads.add(new Road(new PVector(200,200), new PVector(300,200), false));
-   roads.add(new Road(new PVector(300,200), new PVect`or(300,100), true));
-   roads.add(new Road(new PVector(300,100), new PVector(200,100), false));
-   
-   roads.add(new Road(new PVector(200,100), new PVector(200,0), true));
-   roads.add(new Road(new PVector(200,0), new PVector(100,0), false));
-   roads.add(new Road(new PVector(100,0), new PVector(100,100), true));*/
   setLayout();
-  //println(path);
-  /*for(int i = 0; i < visitedRoads.size(); i++) {
-    for(PVector it : visitedRoads.get(i)) {
-      print(it);
-    }
-    println("|||");
-  }*/
 }
 
 void draw() {
@@ -66,45 +37,44 @@ void draw() {
     noLoop();
     return;
   }
-  // Path is precalculated, simply iterating through it
-  if (pathIndex < path.size()) {
-    garbageTruck.loc = path.get(pathIndex);
-    pathIndex++;
-  } else {
-    for (int i = 0; i < path.size(); i++) {
-      println(path.get(i));
-    }
-    println("YESS");
+  if(path == null) {
+    render();
+    println("Path could not be found");
+    running = false;
     noLoop();
+    return;
   }
-  background(127, 255, 0);
-  fill(127, 127, 127);
-  for (int i = 0; i < roads.size(); i++) {
-    roads.get(i).pave();
+  // Path is precalculated, changes route if capacity interferes
+  if(currentCap < garbageTruck.capacity && backTrack == 0) {
+    if(pathIndex < path.size()) {
+      garbageTruck.turnGreen();
+      garbageTruck.loc = path.get(pathIndex);
+      pathIndex++;
+      currentCap++;
+      if(garbageTruck.loc.equals(landfill)) {
+        currentCap = 0;
+      }
+    } else {
+      for (int i = 0; i < path.size(); i++) {
+        println(path.get(i));
+      }
+      println("DONE");
+      noLoop();
+    }
+  } else if(currentCap == garbageTruck.capacity) {
+    // Always follows current path. Although slightly inefficient, it works without fail
+    garbageTruck.turnRed();
+    backTrack++;
+    garbageTruck.loc = path.get(pathIndex-backTrack);
+    if(garbageTruck.loc.equals(landfill)) {
+      currentCap = 0;
+    }
+  } else {
+    garbageTruck.turnGreen();
+    backTrack--;
+    garbageTruck.loc = path.get(pathIndex-backTrack);
   }
-  fill(127, 127, 127);
-  rectMode(CENTER);
-  for (PVector it : intersectionSet) {
-    rect(it.x, it.y, 20, 20);
-  }
-  rectMode(CENTER);
-  fill(127, 127, 255);
-  circle(landfill.x, landfill.y, 20);
-  fill(garbageTruck.paint);
-  //pushMatrix();
-  //translate(garbageTruck.loc.x,garbageTruck.loc.y);
-  //rotate(garbageTruck.direction);
-  rectMode(CENTER);
-  rect(garbageTruck.loc.x, garbageTruck.loc.y, 20, 20);
-  rectMode(CORNER);
-  //popMatrix();
-  // Graph traversal
-  /*if(current.direction != adjList.get(currentIndex).get(0).direction) {
-   garbageTruck.turn();
-   }*/
-  /*current = adjList.get(currentIndex).get(0);
-   currentIndex = roads.indexOf(current);
-   garbageTruck.loc = roads.get(currentIndex).start;*/
+  render();
 }
 
 // Find shortest path using depth-first-search
@@ -113,22 +83,14 @@ ArrayList<PVector> findPath(ArrayList<PVector> prev) {
   ArrayList<PVector> hold;
   PairPVector currentRoad = new PairPVector();
   PVector current = prev.get(prev.size()-1);
-  // Lenght of path based on eulerian or not
-  int size;
-  if (eulerian) {
-    size = roads.size()*2;
-  } else {
-    size = roads.size()*2+1;
-  }
+  // Lenght of path is twice the amount of roads
+  int size = roads.size()*2+1;
   // Base case, if path is already at proper size
   if (prev.size() == size) {
     return prev;
   }
   // DFS, try every possible direction
   for (int i = 0; i < intersections.get(current).size(); i++) {
-    /*currentRoad.clear();
-    currentRoad.add(current);
-    currentRoad.add(intersections.get(current).get(i));*/
     // Get start and end of road
     currentRoad.x = current;
     currentRoad.y = intersections.get(current).get(i);
@@ -137,7 +99,6 @@ ArrayList<PVector> findPath(ArrayList<PVector> prev) {
     }
     // If not in visited, move along road
     if(!currentRoad.arrayContains(visitedRoads)) {
-    //if (!visitedRoads.contains(currentRoad)) {
       prev.add(intersections.get(current).get(i));
       visitedRoads.add(currentRoad);
       hold = findPath(prev);
@@ -146,8 +107,8 @@ ArrayList<PVector> findPath(ArrayList<PVector> prev) {
         prev.remove(prev.size()-1);
         continue;
       }
-      // If path does not end beside landfill
-      if (!intersections.get(prev.get(prev.size()-1)).contains(landfill)) {
+      // If path does not end on landfill
+      if (!hold.get(hold.size()-1).equals(landfill)) {
         prev.remove(prev.size()-1);
         continue;
       }
@@ -158,29 +119,22 @@ ArrayList<PVector> findPath(ArrayList<PVector> prev) {
   return null;
 }
 
-// Check if it is eulerian graph
-boolean checkEulerian() {
-  for (PVector it : intersectionSet) {
-    // Allows sizes of 1 because the truck can go both ways of the road
-    if (intersections.get(it).size()%2 == 1 && intersections.get(it).size() != 1) {
-      return false;
-    }
-  }
-  return true;
-}
-
 // Setup the entire layout of a roads file
 void setLayout() {
   intersections.clear();
   intersectionSet.clear();
   roads.clear();
   visitedRoads.clear();
+  pathIndex = 0;
+  currentCap = 0;
+  backTrack = 0;
   newRoads = loadStrings(whichFile);
   boolean direct;
   String hold, first, second;
   int commaIndex;
   PVector pointOne;
   PVector pointTwo;
+  // Creates roads based on txt file
   for (int i = 0; i < newRoads.length; i++) {
     if (newRoads[i].charAt(0) == '#') {
       i++;
@@ -214,11 +168,28 @@ void setLayout() {
   }
   garbageTruck.loc = landfill;
   current = starting;
-  currentIndex = startIndex;
-  eulerian = checkEulerian();
   path = new ArrayList<PVector>();
   path.add(landfill);
-  //println(path);
   path = findPath(path);
-  path.add(landfill);
+}
+
+// Render everything
+void render() {
+  background(127, 255, 0);
+  fill(127, 127, 127);
+  for (int i = 0; i < roads.size(); i++) {
+    roads.get(i).pave();
+  }
+  fill(127, 127, 127);
+  rectMode(CENTER);
+  for (PVector it : intersectionSet) {
+    rect(it.x, it.y, 20, 20);
+  }
+  rectMode(CENTER);
+  fill(127, 127, 255);
+  circle(landfill.x, landfill.y, 40);
+  fill(garbageTruck.paint);
+  rectMode(CENTER);
+  rect(garbageTruck.loc.x, garbageTruck.loc.y, 20, 20);
+  rectMode(CORNER);
 }
